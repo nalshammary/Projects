@@ -1,0 +1,65 @@
+def multiple_preference(votes):
+    """ takes a list of votes and returns the outcome of that election using
+    the Multiple Preference voting scheme."""
+    
+    # adds first preference votes into a dictionary (candidate: voter's list of 
+    # votes whose first vote is that canidiate)
+    vote_dict = {}
+    candidates = votes[0]
+    for candidate in candidates:
+        vote_dict[candidate] = []
+    for vote in votes:
+        vote_dict[vote[0]].append(vote)
+        
+    # repeats the following until candidate has more than 50% of votes or there 
+    # is a tie between final two candidates
+    for i in range(len(candidates) - 1): 
+        
+        # finds candidate with maximum votes (not including ties)
+        max_vote = 0
+        candidate = ''
+        for vote in vote_dict:
+            if len(vote_dict[vote]) > max_vote:
+                candidate = vote
+                max_vote = len(vote_dict[vote])
+
+        # returns the candidate if they received more than 50% of votes
+        if max_vote * 2 > len(votes):
+            return candidate
+        
+        # returns tie if there are two candidates left, with the same votes
+        if len(vote_dict) == 2:
+            return 'tie'
+        
+        # find candidate with least votes 
+        min_vote = len(votes) + 1
+        candidate = ''
+        for vote in vote_dict:
+            if len(vote_dict[vote]) < min_vote:
+                candidate = vote
+                min_vote = len(vote_dict[vote])
+                
+        # checks if more than one candidate had the same lowest vote
+        lowest_votes = [candidate, ]
+        for vote in vote_dict:
+            if len(vote_dict[vote]) == min_vote and vote != candidate:
+                lowest_votes.append(vote)
+
+        # if there is more than one candidate with the same lowest vote, choose 
+        # the lowest candidate whose name is lower
+        if len(lowest_votes) > 1:
+            for person in lowest_votes:
+                if person < candidate:
+                    candidate = person
+        
+        # allocating the lowest candidates votes to the other candidates
+        for vote in votes:
+            for person in vote:
+                if person not in candidates:
+                    vote.remove(person)
+            if vote[0] == candidate:
+                vote_dict[vote[1]].append(vote[1:])
+                
+        # removing the lowest candidate from possible votes in vote_dict
+        vote_dict.pop(candidate)
+        candidates.remove(candidate)
